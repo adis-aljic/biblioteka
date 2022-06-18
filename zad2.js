@@ -15,6 +15,18 @@
 // }
 // let listOfPeople = importNamesAndCreateListOfPeople("employees.txt")
 
+const { timeStamp } = require("console");
+
+// funkcija za racunanje da li je overdue
+
+const days = (date) =>{
+let date_1 = new Date(date);
+let date_2 = new Date();
+
+    let difference = date_1.getTime() - date_2.getTime();
+    let TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
+    return TotalDays;
+}
 const getTime = () => {     // funkcija koja daje timestamp
     const currentDate = new Date();
     return currentDate.toLocaleString();
@@ -61,6 +73,44 @@ const generateJMBG = (date) => {
     return jmbg
 }
 
+createAcc = (person) => {
+    person.memberOfLibrary = true
+    return {
+        firstName: person.firstName,
+        lastName: person.lastName,
+        jmbg: person.jmbg,
+        id: person.jmbg.slice(-6),  // id je orginalno trebao da bude unikatni dio maticnog broja
+        borrowedBook: undefined,  // knjiga koja je trenutno posudjena
+        borrowBooks: []        // sve knjige koje su bile posudjene
+    }
+}
+const TransactionBorrow  = (account) => {
+    return{
+        firstName : account.firstName,
+        lastName : account.lastName,
+        book: account.borrowedBook,
+        type : "Borrow",
+        timeStamp: getTime()
+    }}
+const TransactionReturn  = (account) => {
+    return{
+        firstName : account.firstName,
+        lastName : account.lastName,
+        book: account.borrowedBook,
+
+        type : "Return",
+        timeStamp: getTime()
+    }}
+const TransactionDonate  = (firstName, lastName,book,bookAuthor) => {
+    return{
+        firstName,
+        lastName,
+        book,
+        bookAuthor,
+        type : "Donate",
+        timeStamp: getTime()
+    }}
+
 
 
 class Book {
@@ -78,51 +128,55 @@ class Book {
 }
 class Library {
     libraryName;        // ime biblioteke
-    books = [];         // spisak svih knjiga koje se nalaze u biblioteci
+    listOfBooks = [];    // spisak svih knjiga koje se nalaze u biblioteci
     accounts = [];      // spisak svih acc korisinika date biblioteke
     transactions = [];    // spisak svih transakcija u biblioteci(vracanje, izdavanje, doniranje knjiga itd)
     penalties = [];       // spisak svih korisnika koji su imali overdue
     libraryId;                 // id biblioteke
-    constructor(libraryName, books = [], accounts = [], transactions = [], penalties = [], libraryId) {
+    constructor(libraryName, libraryId) {
         this.libraryName = libraryName,
-            this.books = books,
-            this.accounts = accounts,
-            this.transactions = transactions,
-            this.penalties = penalties,
-            this.libraryId = libraryId
+        this.libraryId = libraryId,
+          this.listOfBooks = [],
+          this.accounts = []
     }
     createAccount(account) {
         account.accId = this.accounts.length + 1         // dodatni id acc koji sam dodjelio radi testiranja 
         this.accounts.push(account)
     }
-    donateBook(book) {
-        this.books.push(book)
+    donateBook(person,book) {
+        this.transactions.push(TransactionDonate(person.firstName, person.lastName, book.bookName,book.bookAuthor))
+        this.listOfBooks.push(book)
+            
+
     }
     borrowBook(book, person,ID) {
         person.borrowedBook = book
 
         this.accounts.forEach(account => {
             // if (account.id == person.jmbg.slice(-6)) {
-            if (account.accId == ID) {
+                if (account.accId == ID) {
+                this.transactions.push(TransactionBorrow(account))
                 account.borrowedBook = book
                 account.borrowBooks.push(book)
                 book.status = "borrowed"
                 account.date = getTime();
-                this.books.splice(libary.books.indexOf(book), 1)
+                this.listOfBooks.splice(libary.listOfBooks.indexOf(book), 1)
             }
         });
     }
-    returnBook(book, person) {
+    returnBook(book, person,account_ID) {
 
         person.borrowedBook = undefined,
             this.accounts.forEach(account => {
-                if (account.date.substring(0, 2) > getTime().substring[0, 2]) {
+                
+                if(days(account.date) > 20) {
                     this.payFine()
                 }
-                if (account.id == person.jmbg.slice(-6)) {
-
+                if (account.accId == account_ID) {
+                    this.transactions.push(TransactionReturn(account))
+                    account.borrowedBook = undefined
                     book.status = "Available"
-                    this.books.push(book)
+                    this.listOfBooks.push(book)
                 }
             });
 
@@ -131,14 +185,14 @@ class Library {
         console.log("You must pay fine for overdue")
     }
     findBookByName(nameOfBook) {
-        for (let i = 0; i < this.books.length; i++) {
-            const book = this.books[i]
+        for (let i = 0; i < this.listOfBooks.length; i++) {
+            const book = this.listOfBooks[i]
             if (book.bookName == nameOfBook) return book
         }
     }
     findBookByAuthor(authorOfBook) {
-        for (let i = 0; i < this.books.length; i++) {
-            const book = this.books[i]
+        for (let i = 0; i < this.listOfBooks.length; i++) {
+            const book = this.listOfBooks[i]
             if (book.bookAuthor == authorOfBook) return book
         }
     }
@@ -179,25 +233,23 @@ let theTrial = new Book("The Trial", "Franz Kafka", 1925, "Available");
 let annaKarenina = new Book("Anna Karenina", "Leo Tolstoy", 1878, "Available");
 let toKillAMockingbird = new Book("To Kill a Mockingbird", "Harper Lee", 1960, "Available");
 let janeDoe = new Person("Jane", "Doe")
-libary.donateBook(theTrial)
-libary.donateBook(toKillAMockingbird)
-libary.donateBook(annaKarenina)
-
-createAcc = (person) => {
-    person.memberOfLibrary = true
-    return {
-        firstName: person.firstName,
-        lastName: person.lastName,
-        jmbg: person.jmbg,
-        id: person.jmbg.slice(-6),  // id je orginalno trebao da bude unikatni dio maticnog broja
-        borrowedBook: undefined,  // knjiga koja je trenutno posudjena
-        borrowBooks: []        // sve knjige koje su bile posudjene
-    }
-}
-
-
+let johnDoe = new Person("John","Doe")
 libary.createAccount(createAcc(janeDoe))
+libary.createAccount(createAcc(johnDoe))
+libary.donateBook(janeDoe,theTrial)
+libary.donateBook(janeDoe,toKillAMockingbird)
+libary.donateBook(janeDoe,annaKarenina)
 libary.borrowBook(theTrial, janeDoe,1)
+libary.borrowBook(toKillAMockingbird, janeDoe,1)
+libary.borrowBook(annaKarenina,johnDoe,2)
+libary.returnBook(annaKarenina,johnDoe,2)
+libary.returnBook(toKillAMockingbird,janeDoe,1)
+
+
+
+
 // libary.returnBook(theTrial, janeDoe)
 // console.log(libary.findAccountByName("Jane"))
-console.log(libary)
+// console.log(johnDoe)
+// console.log(libary.findAccountByACCID(2))
+console.log(libary.transactions)
