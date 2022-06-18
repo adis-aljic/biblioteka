@@ -19,9 +19,9 @@ const { timeStamp } = require("console");
 
 // funkcija za racunanje da li je overdue
 
-const days = (date) =>{
-let date_1 = new Date(date);
-let date_2 = new Date();
+const days = (date) => {
+    let date_1 = new Date(date);
+    let date_2 = new Date();
 
     let difference = date_1.getTime() - date_2.getTime();
     let TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
@@ -84,32 +84,50 @@ createAcc = (person) => {
         borrowBooks: []        // sve knjige koje su bile posudjene
     }
 }
-const TransactionBorrow  = (account) => {
-    return{
-        firstName : account.firstName,
-        lastName : account.lastName,
+
+//funkcije za biljezenje transakcija
+const TransactionBorrow = (account) => {
+    return {
+        firstName: account.firstName,
+        lastName: account.lastName,
         book: account.borrowedBook,
-        type : "Borrow",
+        type: "Borrow",
         timeStamp: getTime()
-    }}
-const TransactionReturn  = (account) => {
-    return{
-        firstName : account.firstName,
-        lastName : account.lastName,
+    }
+}
+const TransactionReturn = (account) => {
+    return {
+        firstName: account.firstName,
+        lastName: account.lastName,
         book: account.borrowedBook,
 
-        type : "Return",
+        type: "Return",
         timeStamp: getTime()
-    }}
-const TransactionDonate  = (firstName, lastName,book,bookAuthor) => {
-    return{
+    }
+}
+const TransactionDonate = (firstName, lastName, book, bookAuthor) => {
+    return {
         firstName,
         lastName,
         book,
         bookAuthor,
-        type : "Donate",
+        type: "Donate",
         timeStamp: getTime()
-    }}
+    }
+}
+const penaltyTransaction = (account, amount) => {
+    return {
+        firstName: account.firstName,
+        lastName: account.lastName,
+        ammount: amount,
+        book: account.borrowedBook,
+        type: "penalty for overdue",
+        timeStamp: getTime(),
+        overdue: days() + " days"
+
+    }
+}
+
 
 
 
@@ -119,7 +137,7 @@ class Book {
     bookYear;       // godina izdavanja
     status;         // da li je knjiga izdana nekome ili nije (moze se staviti i koji je zanr data knjiga i slicno)
 
-    constructor(bookName, bookAuthor, bookYear, status="Avaiable") {
+    constructor(bookName, bookAuthor, bookYear, status = "Avaiable") {
         this.bookName = bookName,
             this.bookAuthor = bookAuthor,
             this.bookYear = bookYear,
@@ -128,33 +146,50 @@ class Book {
 }
 class Library {
     libraryName;        // ime biblioteke
-    listOfBooks = [];    // spisak svih knjiga koje se nalaze u biblioteci
+    listOfBooks = []; // spisak svih knjiga koje se nalaze u biblioteci
+    numberOfAccounts = 0;
+    numberOfBooks = 0;    
     accounts = [];      // spisak svih acc korisinika date biblioteke
     transactions = [];    // spisak svih transakcija u biblioteci(vracanje, izdavanje, doniranje knjiga itd)
     penalties = [];       // spisak svih korisnika koji su imali overdue
     libraryId;                 // id biblioteke
     constructor(libraryName, libraryId) {
         this.libraryName = libraryName,
-        this.libraryId = libraryId,
-          this.listOfBooks = [],
-          this.accounts = []
+            this.libraryId = libraryId,
+            this.listOfBooks = [],
+            this.accounts = []
     }
     createAccount(account) {
         account.accId = this.accounts.length + 1         // dodatni id acc koji sam dodjelio radi testiranja 
         this.accounts.push(account)
+        this.numberOfAccounts += 1;
     }
-    donateBook(person,book) {
-        this.transactions.push(TransactionDonate(person.firstName, person.lastName, book.bookName,book.bookAuthor))
+    closeAccount(account_ID) {
+        this.accounts.forEach(account => {
+            if(account.accId == account_ID) {
+                if (account.borrowedBook == undefined) {
+                    this.numberOfAccounts -= 1
+                    // account.splice(this.accounts.indexOf(account),1)
+                    return "You are suscesfulu closed your account"
+                }
+                else {return "Please return books before closing your account"}
+
+            }
+        });
+    }
+    donateBook(person, book) {
+        this.transactions.push(TransactionDonate(person.firstName, person.lastName, book.bookName, book.bookAuthor))
         this.listOfBooks.push(book)
-            
+        this.numberOfBooks += 1
+
 
     }
-    borrowBook(book, person,ID) {
+    borrowBook(book, person, ID) {
         person.borrowedBook = book
 
         this.accounts.forEach(account => {
             // if (account.id == person.jmbg.slice(-6)) {
-                if (account.accId == ID) {
+            if (account.accId == ID) {
                 this.transactions.push(TransactionBorrow(account))
                 account.borrowedBook = book
                 account.borrowBooks.push(book)
@@ -164,13 +199,13 @@ class Library {
             }
         });
     }
-    returnBook(book, person,account_ID) {
+    returnBook(book, person, account_ID) {
 
         person.borrowedBook = undefined,
             this.accounts.forEach(account => {
-                
-                if(days(account.date) > 20) {
-                    this.payFine()
+
+                if (days(account.date) > 20) {
+                    this.fineAlert()
                 }
                 if (account.accId == account_ID) {
                     this.transactions.push(TransactionReturn(account))
@@ -181,7 +216,16 @@ class Library {
             });
 
     }
-    payFine() {
+    payFine(amount, account_ID) {
+        this.accounts.forEach(account => {
+            if (account.accId == account_ID) {
+                this.penalties.push(penaltyTransaction(account, amount))
+            }
+        });
+
+    }
+    fineAlert() {
+
         console.log("You must pay fine for overdue")
     }
     findBookByName(nameOfBook) {
@@ -233,23 +277,25 @@ let theTrial = new Book("The Trial", "Franz Kafka", 1925, "Available");
 let annaKarenina = new Book("Anna Karenina", "Leo Tolstoy", 1878, "Available");
 let toKillAMockingbird = new Book("To Kill a Mockingbird", "Harper Lee", 1960, "Available");
 let janeDoe = new Person("Jane", "Doe")
-let johnDoe = new Person("John","Doe")
+let johnDoe = new Person("John", "Doe")
 libary.createAccount(createAcc(janeDoe))
 libary.createAccount(createAcc(johnDoe))
-libary.donateBook(janeDoe,theTrial)
-libary.donateBook(janeDoe,toKillAMockingbird)
-libary.donateBook(janeDoe,annaKarenina)
-libary.borrowBook(theTrial, janeDoe,1)
-libary.borrowBook(toKillAMockingbird, janeDoe,1)
-libary.borrowBook(annaKarenina,johnDoe,2)
-libary.returnBook(annaKarenina,johnDoe,2)
-libary.returnBook(toKillAMockingbird,janeDoe,1)
-
+libary.donateBook(janeDoe, theTrial)
+libary.donateBook(janeDoe, toKillAMockingbird)
+libary.donateBook(janeDoe, annaKarenina)
+libary.borrowBook(theTrial, janeDoe, 1)
+libary.borrowBook(toKillAMockingbird, janeDoe, 1)
+libary.borrowBook(annaKarenina, johnDoe, 2)
+libary.returnBook(annaKarenina, johnDoe, 2)
+libary.returnBook(toKillAMockingbird, janeDoe, 1)
+libary.payFine(100, 1)
 
 
 
 // libary.returnBook(theTrial, janeDoe)
 // console.log(libary.findAccountByName("Jane"))
-// console.log(johnDoe)
+console.log(libary.findAccountByACCID(2))
 // console.log(libary.findAccountByACCID(2))
-console.log(libary.transactions)
+console.log(libary.closeAccount(2))
+console.log(libary.closeAccount(1))
+console.log(libary.accounts)
