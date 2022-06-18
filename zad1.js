@@ -69,7 +69,7 @@ class Book {
     bookYear;       // godina izdavanja
     status;         // da li je knjiga izdana nekome ili nije (moze se staviti i koji je zanr data knjiga i slicno)
 
-    constructor(bookName, bookAuthor, bookYear, status) {
+    constructor(bookName, bookAuthor, bookYear, status="Avaiable") {
         this.bookName = bookName,
             this.bookAuthor = bookAuthor,
             this.bookYear = bookYear,
