@@ -98,11 +98,12 @@ class Library {
     donateBook(book) {
         this.books.push(book)
     }
-    borrowBook(book, person) {
+    borrowBook(book, person,ID) {
         person.borrowedBook = book
 
         this.accounts.forEach(account => {
-            if (account.id == person.jmbg.slice(-6)) {
+            // if (account.id == person.jmbg.slice(-6)) {
+            if (account.accId == ID) {
                 account.borrowedBook = book
                 account.borrowBooks.push(book)
                 book.status = "borrowed"
