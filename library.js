@@ -14,23 +14,29 @@
 //     return temp;
 // }
 // let listOfPeople = importNamesAndCreateListOfPeople("employees.txt")
-
+// import { calculateDaysBetweenDates,FindLeapYear} from "./functionForCalculatingDaysBetweenDates.js";
 const { timeStamp } = require("console");
+// console.log(calculateDaysBetweenDates(convertTimeStamp(getCurrentTime()))
+// )
 
-// funkcija za racunanje koliko je vremena knjiga bila izdata
-
-const days = (date) => {
-    let date_1 = new Date(date);
-    let date_2 = new Date();
-
-    let difference = date_1.getTime() - date_2.getTime();
-    let TotalDays = Math.ceil(difference / (1000 * 3600 * 24));
-    return TotalDays;
-}
-const getTime = () => {     // funkcija koja daje timestamp
+// 
+const getCurrentTime = () => {     // funkcija koja daje timestamp
     const currentDate = new Date();
     return currentDate.toLocaleString();
 }
+
+// funkcija za konvertovanje getTime u pravi format
+// const convertTimeStamp = (string) => {
+//     let newFormat = ""
+//     for (let i = 0; i < 9; i++) {
+//         const element = string[i];
+//         if (element == ".") { newFormat += "/" }
+//         else { newFormat += element }
+
+//     }
+//     return newFormat
+
+// }
 // funkcije za generisanje random datuma rodjenja i maticnog broja
 //maticni broj se kasnije koristio kao id tj uniaktni dio maticnog broja ali kako se uvijek random daje maticni broj prilikom
 // svakog pokretanja programa dodao i jos jedna id broj cisto da se moze testirati 
@@ -92,7 +98,7 @@ const TransactionBorrow = (account) => {
         lastName: account.lastName,
         book: account.currentBook,
         type: "Borrow",
-        timeStamp: getTime()
+        timeStamp: getCurrentTime()
     }
 }
 const TransactionReturn = (account) => {
@@ -102,7 +108,7 @@ const TransactionReturn = (account) => {
         book: account.currentBook,
 
         type: "Return",
-        timeStamp: getTime()
+        timeStamp: getCurrentTime()
     }
 }
 const TransactionDonate = (firstName, lastName, book, bookAuthor) => {
@@ -112,18 +118,18 @@ const TransactionDonate = (firstName, lastName, book, bookAuthor) => {
         book,
         bookAuthor,
         type: "Donate",
-        timeStamp: getTime()
+        timeStamp: getCurrentTime()
     }
 }
-const penaltyTransaction = (account, amount) => {
+const penaltyTransaction = (account, amount,numberOfDaysPersonHaveBook = 0) => {
     return {
         firstName: account.firstName,
         lastName: account.lastName,
         ammount: amount,
         book: account.currentBook,
         type: "penalty for overdue",
-        timeStamp: getTime(),
-        overdue: days() + " days"
+        timeStamp: getCurrentTime(),
+        overdue: numberOfDaysPersonHaveBook + " days"
 
     }
 }
@@ -180,34 +186,38 @@ class Library {
         this.transactions.push(TransactionDonate(person.firstName, person.lastName, book.bookName, book.bookAuthor))
         this.listOfBooks.push(book)
         this.numberOfBooks += 1
-        console.log("Thank you " + person.firstName + " " + person.lastName + " for donating '" +  book.bookName + "' book")
+        console.log("Thank you " + person.firstName + " " + person.lastName + " for donating '" + book.bookName + "' book")
 
 
 
     }
     borrowBook(book, person, ID) {
-        person.currentBook = book
-
+        
         this.accounts.forEach(account => {
-            // if (account.id == person.jmbg.slice(-6)) {
-            if (account.accId == ID) {
-                this.transactions.push(TransactionBorrow(account))
-                console.log("Thank you " + person.firstName + " " + person.lastName + " for borrowing '" +  book.bookName + "' book")
+            if(account.currentBook == undefined) {
+
+                // if (account.id == person.jmbg.slice(-6)) {
+                    if (account.accId == ID) {
+                        this.transactions.push(TransactionBorrow(account))
+                        console.log("Thank you " + person.firstName + " " + person.lastName + " for borrowing '" + book.bookName + "' book")
 
                 account.currentBook = book
                 account.allBorrowedBooks.push(book)
                 book.status = "borrowed"
-                account.date = getTime();
+                account.date = getCurrentTime();
                 this.listOfBooks.splice(libary.listOfBooks.indexOf(book), 1)
+                person.currentBook = book
             }
+        }
+        else return console.log("Before borrowing new book, please return old one")
         });
     }
-    returnBook(book, person, account_ID) {
+    returnBook(book, person, account_ID,numberOfDaysPersonHaveBook=0) {
 
         person.currentBook = undefined,
             this.accounts.forEach(account => {
 
-                if (days(account.date) > 20) {
+                if (numberOfDaysPersonHaveBook > 20) {
                     this.fineAlert()
                 }
                 if (account.accId == account_ID) {
@@ -215,7 +225,7 @@ class Library {
                     account.currentBook = undefined
                     book.status = "Available"
                     this.listOfBooks.push(book)
-                    console.log("Thank you " + person.firstName + " " + person.lastName + " for returning '" +  book.bookName + "' book")
+                    console.log("Thank you " + person.firstName + " " + person.lastName + " for returning '" + book.bookName + "' book")
                 }
             });
 
@@ -298,9 +308,10 @@ libary.returnBook(annaKarenina, johnDoe, 2)
 // console.log(libary.findAccountByName("Jane","Doe"))
 // libary.returnBook(theTrial, janeDoe)
 // console.log(libary.findAccountByName("Jane"))
-// console.log(libary.findAccountByACCID(2))
+// console.log(libary.findAccountByACCID(1))
 // console.log(libary.findAccountByACCID(2))
 // console.log(libary.closeAccount(2))
 // console.log(libary.accounts[0])
 // libary.closeAccount(2)
-// console.log(libary.accounts.length)
+console.log(libary.findAccountByACCID(1))
+
