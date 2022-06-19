@@ -129,8 +129,6 @@ const penaltyTransaction = (account, amount) => {
 }
 
 
-
-
 class Book {
     bookName;       // ime knjige
     bookAuthor;     // autor knjige
@@ -144,6 +142,7 @@ class Book {
             this.status = status
     }
 }
+
 class Library {
     libraryName;        // ime biblioteke
     listOfBooks = []; // spisak svih knjiga koje se nalaze u biblioteci
@@ -181,6 +180,8 @@ class Library {
         this.transactions.push(TransactionDonate(person.firstName, person.lastName, book.bookName, book.bookAuthor))
         this.listOfBooks.push(book)
         this.numberOfBooks += 1
+        console.log("Thank you " + person.firstName + " " + person.lastName + " for donating '" +  book.bookName + "' book")
+
 
 
     }
@@ -191,6 +192,8 @@ class Library {
             // if (account.id == person.jmbg.slice(-6)) {
             if (account.accId == ID) {
                 this.transactions.push(TransactionBorrow(account))
+                console.log("Thank you " + person.firstName + " " + person.lastName + " for borrowing '" +  book.bookName + "' book")
+
                 account.currentBook = book
                 account.allBorrowedBooks.push(book)
                 book.status = "borrowed"
@@ -212,6 +215,7 @@ class Library {
                     account.currentBook = undefined
                     book.status = "Available"
                     this.listOfBooks.push(book)
+                    console.log("Thank you " + person.firstName + " " + person.lastName + " for returning '" +  book.bookName + "' book")
                 }
             });
 
@@ -219,6 +223,7 @@ class Library {
     payFine(amount, account_ID) {
         this.accounts.forEach(account => {
             if (account.accId == account_ID) {
+                console.log("You are suscesfuly payed fine")
                 this.penalties.push(penaltyTransaction(account, amount))
             }
         });
@@ -246,12 +251,11 @@ class Library {
             if (account.accId == accId1) return account
         }
     }
-    findAccountByName(name = "0") {
+    findAccountByName(name = "0", lastname = "") {
         const listOfAcounts = []
         for (let i = 0; i < this.accounts.length; i++) {
             const account = this.accounts[i];
-            console.log(account)
-            if (account.firstName == name) listOfAcounts.push(account)
+            if (account.firstName == name && account.lastName == lastname) listOfAcounts.push(account)
         }
         return listOfAcounts
     }
@@ -288,15 +292,15 @@ libary.borrowBook(toKillAMockingbird, janeDoe, 1)
 libary.borrowBook(annaKarenina, johnDoe, 2)
 libary.returnBook(annaKarenina, johnDoe, 2)
 // libary.returnBook(toKillAMockingbird, janeDoe, 1)
-libary.payFine(100, 1)
+// libary.payFine(100, 1)
 
 
-
+// console.log(libary.findAccountByName("Jane","Doe"))
 // libary.returnBook(theTrial, janeDoe)
 // console.log(libary.findAccountByName("Jane"))
 // console.log(libary.findAccountByACCID(2))
 // console.log(libary.findAccountByACCID(2))
 // console.log(libary.closeAccount(2))
 // console.log(libary.accounts[0])
-libary.closeAccount(2)
-console.log(libary.accounts.length)
+// libary.closeAccount(2)
+// console.log(libary.accounts.length)
