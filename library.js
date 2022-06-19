@@ -279,7 +279,7 @@ class Library {
         const listOfAcounts = []
         for (let i = 0; i < this.accounts.length; i++) {
             const account = this.accounts[i];
-            if (account.firstName == name && account.lastName == lastname) listOfAcounts.push(account)
+            if (account.firstName == name || account.lastName == lastname) listOfAcounts.push(account)
         }
         return listOfAcounts
     }
@@ -306,6 +306,7 @@ let libary = new Library("First Library", 1)
 let theTrial = new Book("The Trial", "Franz Kafka", 1925, "Available");
 let annaKarenina = new Book("Anna Karenina", "Leo Tolstoy", 1878, "Available");
 let toKillAMockingbird = new Book("To Kill a Mockingbird", "Harper Lee", 1960, "Available");
+let toKillAMockingbird1 = new Book("To Kill a Mockingbird", "Harper Lee", 1960, "Available")
 let janeDoe = new Person("Jane", "Doe")
 let johnDoe = new Person("John", "Doe")
 let Childhood = new Book("Childhood", "Leo Tolstoy", 1852)
@@ -322,16 +323,18 @@ libary.donateBook(janeDoe, theTrial)
 libary.donateBook(janeDoe, toKillAMockingbird)
 libary.donateBook(janeDoe, annaKarenina)
 libary.donateBook(johnDoe, Childhood)
+libary.donateBook(johnDoe,toKillAMockingbird1)
 
 // testing 
 
-libary.borrowBook(theTrial, janeDoe, 1)
+// libary.borrowBook(theTrial, janeDoe, 1)
 libary.borrowBook(toKillAMockingbird, janeDoe, 1)
-libary.borrowBook(annaKarenina, johnDoe, 2)
-libary.returnBook(annaKarenina, johnDoe, 2)
+libary.borrowBook(toKillAMockingbird1, johnDoe, 2)
+libary.returnBook(toKillAMockingbird1, johnDoe, 2)
 // libary.returnBook(toKillAMockingbird, janeDoe, 1)
 // libary.payFine(100, 1)
 
 // console.log(libary.findBookByAuthor("Leo Tolstoy"))
 
-console.log(libary.transactions)
+console.log(libary.accounts)
+console.log(libary.listOfBooks)
