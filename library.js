@@ -1,8 +1,59 @@
+// stavljene id od transakcija...srediti da racuna datume automaski
 
-const getCurrentTime = () => {     //  for generating timestamp
-    const currentDate = new Date();
-    return currentDate.toLocaleString();
+
+// for caluculating days between borrowing and returning book
+ const FindLeapYear = (year) => {
+    let cnt = 0
+    for (let i = 1600; i <year; i++) {
+        if ((i % 4 == 0) && (i % 100 != 0) || (i % 400 == 0)) {
+            cnt++
+        }
+    }
+    return cnt
 }
+
+ const calculateDaysBetweenDates = (string1, string2) => {
+
+            
+            const daysToDate = (string) => {
+                
+            let days = 0
+
+               if (Number(string.slice(3, 5)) == 1) {days += 0}
+            else if (Number(string.slice(3, 5)) == 2) {days += 28*24*3600}
+            else if (Number(string.slice(3, 5)) == 3) {days += (28 + 31)*24*3600}
+            else if (Number(string.slice(3, 5)) == 4) {days += (28 + 31 + 30)*24*3600}
+            else if (Number(string.slice(3, 5)) == 5) {days += (28 + 31 + 30 + 31)*24*3600}
+            else if (Number(string.slice(3, 5)) == 6) {days += (28 + 31 + 30 + 31 + 30)*24*3600}
+            else if (Number(string.slice(3, 5)) == 7) {days += (28 + 31 + 30 + 31 + 30 + 31)*24*3600}
+            else if (Number(string.slice(3, 5)) == 8) {days += (28 + 31 + 30 + 31 + 30 + 31 + 31)*24*3600}
+            else if (Number(string.slice(3, 5)) == 9) {days += (28 + 31 + 30 + 31 + 30 + 31 + 31 + 30)*24*3600}
+            else if (Number(string.slice(3, 5)) == 10) {days += (28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31)*24*3600}
+            else if (Number(string.slice(3, 5)) == 11) {days += (28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30)*24*3600}
+            else if (Number(string.slice(3, 5)) == 12) {days += (28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31)*24*3600}
+            
+            let daysFromYears = (Number(string.slice(-5, -1)) -2000)*365
+            let numberOfDays = Number(string.slice(0, 2))*24*3600
+            let summDaysFrom = numberOfDays + daysFromYears
+            let daysFromLeapYear = FindLeapYear(daysFromYears)*24*3600
+            
+            let totalDays = summDaysFrom + daysFromLeapYear + days
+            if (FindLeapYear(string.slice(-5, -1))) {totalDays += 24*3600}
+            return totalDays/3600/24
+        }
+
+   
+        return Math.trunc(daysToDate(string2) - daysToDate(string1))
+    }
+
+    
+    const getCurrentTime = () => {     //  for generating timestamp
+        const currentDate = new Date();
+        return currentDate.toLocaleString();
+    }
+    console.log(getCurrentTime().slice(0,9))
+    console.log(calculateDaysBetweenDates(getCurrentTime().slice(0,9),"10.10.2022"))
+    
 // for generating birth date and jmbg
 const generateBirthDate = () => {
     const leapYears = [1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996, 2000, 2004]
@@ -52,36 +103,40 @@ createAcc = (person) => {
     }
 }
 // for creating transactions for every type
-const TransactionBorrow = (account) => {
+const TransactionBorrow = (account,transactionID) => {
     return {
         firstName: account.firstName,
         lastName: account.lastName,
         book: account.currentBook,
         type: "Borrow",
-        timeStamp: getCurrentTime()
+        timeStamp: getCurrentTime(),
+        transactionID : transactionID
+        
     }
 }
-const TransactionReturn = (account) => {
+const TransactionReturn = (account,transactionID) => {
     return {
         firstName: account.firstName,
         lastName: account.lastName,
         book: account.currentBook,
 
         type: "Return",
-        timeStamp: getCurrentTime()
+        timeStamp: getCurrentTime(),
+        transactionID
     }
 }
-const TransactionDonate = (firstName, lastName, book, bookAuthor) => {
+const TransactionDonate = (firstName, lastName, book, bookAuthor,transactionID) => {
     return {
         firstName,
         lastName,
         book,
         bookAuthor,
         type: "Donate",
-        timeStamp: getCurrentTime()
+        timeStamp: getCurrentTime(),
+        transactionID
     }
 }
-const penaltyTransaction = (account, amount, numberOfDaysPersonHaveBook = 0) => {
+const penaltyTransaction = (account, amount, numberOfDaysPersonHaveBook = 0,transactionID) => {
     return {
         firstName: account.firstName,
         lastName: account.lastName,
@@ -89,7 +144,8 @@ const penaltyTransaction = (account, amount, numberOfDaysPersonHaveBook = 0) => 
         book: account.currentBook,
         type: "penalty for overdue",
         timeStamp: getCurrentTime(),
-        overdue: numberOfDaysPersonHaveBook + " days"
+        overdue: numberOfDaysPersonHaveBook + " days",
+        transactionID
     }
 }
 class Book {
@@ -138,7 +194,8 @@ class Library {
         });
     }
     donateBook(person, book) {
-        this.transactions.push(TransactionDonate(person.firstName, person.lastName, book.bookName, book.bookAuthor))
+        this.transactionID = this.transactions.length
+        this.transactions.push(TransactionDonate(person.firstName, person.lastName, book.bookName, book.bookAuthor,this.transactionID))
         this.listOfBooks.push(book)
         this.numberOfBooks += 1
         console.log("Thank you " + person.firstName + " " + person.lastName + " for donating '" + book.bookName + "' book")
@@ -147,7 +204,8 @@ class Library {
         this.accounts.forEach(account => {
             if (account.currentBook == undefined) {
                 if (account.accId == ID) {
-                    this.transactions.push(TransactionBorrow(account))
+                    this.transactionID = this.transactions.length
+                    this.transactions.push(TransactionBorrow(account,this.transactionID))
                     console.log("Thank you " + person.firstName + " " + person.lastName + " for borrowing '" + book.bookName + "' book")
                     account.currentBook = book
                     account.allBorrowedBooks.push(book)
@@ -155,20 +213,23 @@ class Library {
                     account.date = getCurrentTime();
                     this.listOfBooks.splice(libary.listOfBooks.indexOf(book), 1)
                     person.currentBook = book
+
                 }
             }
             else return console.log("Before borrowing new book, please return old one")
         });
     }
     returnBook(book, person, account_ID, numberOfDaysPersonHaveBook = 0) {
+        
         person.currentBook = undefined,
-            this.accounts.forEach(account => {
+        this.accounts.forEach(account => {
 
-                if (numberOfDaysPersonHaveBook > 20) {
+            if (numberOfDaysPersonHaveBook > 20) {
                     this.fineAlert()
                 }
                 if (account.accId == account_ID) {
-                    this.transactions.push(TransactionReturn(account))
+                    this.transactionID = this.transactions.length
+                    this.transactions.push(TransactionReturn(account,this.transactionID))
                     account.currentBook = undefined
                     book.status = "Available"
                     this.listOfBooks.push(book)
@@ -179,8 +240,10 @@ class Library {
     payFine(amount, account_ID) {
         this.accounts.forEach(account => {
             if (account.accId == account_ID) {
+                this.transactionID = this.transactions.length
+
                 console.log("Thank you " + account.firstName + " " + account.lastName +" .You are suscesfuly payed fine")
-                this.penalties.push(penaltyTransaction(account, amount))
+                this.penalties.push(penaltyTransaction(account, amount,this.transactionID))
             }
         });
     }
@@ -259,9 +322,10 @@ libary.donateBook(johnDoe,Childhood)
 libary.borrowBook(theTrial, janeDoe, 1)
 libary.borrowBook(toKillAMockingbird, janeDoe, 1)
 libary.borrowBook(annaKarenina, johnDoe, 2)
-libary.returnBook(annaKarenina, johnDoe, 2)
-libary.returnBook(toKillAMockingbird, janeDoe, 1)
-libary.payFine(100, 1)
+// libary.returnBook(annaKarenina, johnDoe, 2)
+// libary.returnBook(toKillAMockingbird, janeDoe, 1)
+// libary.payFine(100, 1)
 
-console.log(libary.findBookByAuthor("Leo Tolstoy"))
+// console.log(libary.findBookByAuthor("Leo Tolstoy"))
 
+console.log(libary.transactions)
