@@ -194,10 +194,14 @@ class Library {
         }
     }
     findBookByAuthor(authorOfBook) {
+        const booksFromAuthor = []
         for (let i = 0; i < this.listOfBooks.length; i++) {
             const book = this.listOfBooks[i]
-            if (book.bookAuthor == authorOfBook) return book
+            if (book.bookAuthor == authorOfBook) {
+                booksFromAuthor.push(book)
+            }
         }
+        return booksFromAuthor
     }
     findAccountByACCID(accId1 = 0) {
         for (let i = 0; i < this.accounts.length; i++) {
@@ -238,6 +242,7 @@ let annaKarenina = new Book("Anna Karenina", "Leo Tolstoy", 1878, "Available");
 let toKillAMockingbird = new Book("To Kill a Mockingbird", "Harper Lee", 1960, "Available");
 let janeDoe = new Person("Jane", "Doe")
 let johnDoe = new Person("John", "Doe")
+let Childhood = new Book("Childhood","Leo Tolstoy",1852)
 
 // creating accounts 
 libary.createAccount(createAcc(janeDoe))
@@ -247,6 +252,7 @@ libary.createAccount(createAcc(johnDoe))
 libary.donateBook(janeDoe, theTrial)
 libary.donateBook(janeDoe, toKillAMockingbird)
 libary.donateBook(janeDoe, annaKarenina)
+libary.donateBook(johnDoe,Childhood)
 
 // testing 
 
@@ -257,5 +263,5 @@ libary.returnBook(annaKarenina, johnDoe, 2)
 libary.returnBook(toKillAMockingbird, janeDoe, 1)
 libary.payFine(100, 1)
 
-console.log(libary.findAccountByACCID(1))
+console.log(libary.findBookByAuthor("Leo Tolstoy"))
 
