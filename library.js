@@ -179,7 +179,7 @@ class Library {
     payFine(amount, account_ID) {
         this.accounts.forEach(account => {
             if (account.accId == account_ID) {
-                console.log("You are suscesfuly payed fine")
+                console.log("Thank you " + account.firstName + " " + account.lastName +" .You are suscesfuly payed fine")
                 this.penalties.push(penaltyTransaction(account, amount))
             }
         });
