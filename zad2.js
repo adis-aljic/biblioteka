@@ -148,7 +148,7 @@ class Library {
     libraryName;        // ime biblioteke
     listOfBooks = []; // spisak svih knjiga koje se nalaze u biblioteci
     numberOfAccounts = 0;
-    numberOfBooks = 0;    
+    numberOfBooks = 0;
     accounts = [];      // spisak svih acc korisinika date biblioteke
     transactions = [];    // spisak svih transakcija u biblioteci(vracanje, izdavanje, doniranje knjiga itd)
     penalties = [];       // spisak svih korisnika koji su imali overdue
@@ -166,13 +166,13 @@ class Library {
     }
     closeAccount(account_ID) {
         this.accounts.forEach(account => {
-            if(account.accId == account_ID) {
+            if (account.accId == account_ID) {
                 if (account.borrowedBook == undefined) {
                     this.numberOfAccounts -= 1
-                    // account.splice(this.accounts.indexOf(account),1)
-                    return "You are suscesfulu closed your account"
+                    this.accounts.splice(account.accId - 1, 1)
+                    return console.log("You are suscesfuly closed your account")
                 }
-                else {return "Please return books before closing your account"}
+                else { return console.log("Please return books before closing your account") }
 
             }
         });
@@ -287,15 +287,16 @@ libary.borrowBook(theTrial, janeDoe, 1)
 libary.borrowBook(toKillAMockingbird, janeDoe, 1)
 libary.borrowBook(annaKarenina, johnDoe, 2)
 libary.returnBook(annaKarenina, johnDoe, 2)
-libary.returnBook(toKillAMockingbird, janeDoe, 1)
+// libary.returnBook(toKillAMockingbird, janeDoe, 1)
 libary.payFine(100, 1)
 
 
 
 // libary.returnBook(theTrial, janeDoe)
 // console.log(libary.findAccountByName("Jane"))
-console.log(libary.findAccountByACCID(2))
 // console.log(libary.findAccountByACCID(2))
-console.log(libary.closeAccount(2))
-console.log(libary.closeAccount(1))
-console.log(libary.accounts)
+// console.log(libary.findAccountByACCID(2))
+// console.log(libary.closeAccount(2))
+// console.log(libary.accounts[0])
+libary.closeAccount(2)
+console.log(libary.accounts.length)
