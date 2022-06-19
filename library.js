@@ -1,10 +1,7 @@
-// stavljene id od transakcija...srediti da racuna datume automaski
-
-
 // for caluculating days between borrowing and returning book
- const FindLeapYear = (year) => {
+const FindLeapYear = (year) => {
     let cnt = 0
-    for (let i = 1600; i <year; i++) {
+    for (let i = 1600; i < year; i++) {
         if ((i % 4 == 0) && (i % 100 != 0) || (i % 400 == 0)) {
             cnt++
         }
@@ -12,48 +9,46 @@
     return cnt
 }
 
- const calculateDaysBetweenDates = (string1, string2) => {
+const calculateDaysBetweenDates = (string1) => {
 
-            
-            const daysToDate = (string) => {
-                
-            let days = 0
 
-               if (Number(string.slice(3, 5)) == 1) {days += 0}
-            else if (Number(string.slice(3, 5)) == 2) {days += 28*24*3600}
-            else if (Number(string.slice(3, 5)) == 3) {days += (28 + 31)*24*3600}
-            else if (Number(string.slice(3, 5)) == 4) {days += (28 + 31 + 30)*24*3600}
-            else if (Number(string.slice(3, 5)) == 5) {days += (28 + 31 + 30 + 31)*24*3600}
-            else if (Number(string.slice(3, 5)) == 6) {days += (28 + 31 + 30 + 31 + 30)*24*3600}
-            else if (Number(string.slice(3, 5)) == 7) {days += (28 + 31 + 30 + 31 + 30 + 31)*24*3600}
-            else if (Number(string.slice(3, 5)) == 8) {days += (28 + 31 + 30 + 31 + 30 + 31 + 31)*24*3600}
-            else if (Number(string.slice(3, 5)) == 9) {days += (28 + 31 + 30 + 31 + 30 + 31 + 31 + 30)*24*3600}
-            else if (Number(string.slice(3, 5)) == 10) {days += (28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31)*24*3600}
-            else if (Number(string.slice(3, 5)) == 11) {days += (28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30)*24*3600}
-            else if (Number(string.slice(3, 5)) == 12) {days += (28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31)*24*3600}
-            
-            let daysFromYears = (Number(string.slice(-5, -1)) -2000)*365
-            let numberOfDays = Number(string.slice(0, 2))*24*3600
-            let summDaysFrom = numberOfDays + daysFromYears
-            let daysFromLeapYear = FindLeapYear(daysFromYears)*24*3600
-            
-            let totalDays = summDaysFrom + daysFromLeapYear + days
-            if (FindLeapYear(string.slice(-5, -1))) {totalDays += 24*3600}
-            return totalDays/3600/24
-        }
+    const daysToDate = (string) => {
 
-   
-        return Math.trunc(daysToDate(string2) - daysToDate(string1))
+        let days = 0
+
+        if (Number(string.slice(3, 5)) == 1) { days += 0 }
+        else if (Number(string.slice(3, 5)) == 2) { days += 28 * 24 * 3600 }
+        else if (Number(string.slice(3, 5)) == 3) { days += (28 + 31) * 24 * 3600 }
+        else if (Number(string.slice(3, 5)) == 4) { days += (28 + 31 + 30) * 24 * 3600 }
+        else if (Number(string.slice(3, 5)) == 5) { days += (28 + 31 + 30 + 31) * 24 * 3600 }
+        else if (Number(string.slice(3, 5)) == 6) { days += (28 + 31 + 30 + 31 + 30) * 24 * 3600 }
+        else if (Number(string.slice(3, 5)) == 7) { days += (28 + 31 + 30 + 31 + 30 + 31) * 24 * 3600 }
+        else if (Number(string.slice(3, 5)) == 8) { days += (28 + 31 + 30 + 31 + 30 + 31 + 31) * 24 * 3600 }
+        else if (Number(string.slice(3, 5)) == 9) { days += (28 + 31 + 30 + 31 + 30 + 31 + 31 + 30) * 24 * 3600 }
+        else if (Number(string.slice(3, 5)) == 10) { days += (28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31) * 24 * 3600 }
+        else if (Number(string.slice(3, 5)) == 11) { days += (28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30) * 24 * 3600 }
+        else if (Number(string.slice(3, 5)) == 12) { days += (28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30 + 31) * 24 * 3600 }
+
+        let daysFromYears = (Number(string.slice(-5, -1)) - 2000) * 365
+        let numberOfDays = Number(string.slice(0, 2)) * 24 * 3600
+        let summDaysFrom = numberOfDays + daysFromYears
+        let daysFromLeapYear = FindLeapYear(daysFromYears) * 24 * 3600
+
+        let totalDays = summDaysFrom + daysFromLeapYear + days
+        if (FindLeapYear(string.slice(-5, -1))) { totalDays += 24 * 3600 }
+        return totalDays / 3600 / 24
     }
 
-    
-    const getCurrentTime = () => {     //  for generating timestamp
-        const currentDate = new Date();
-        return currentDate.toLocaleString();
-    }
-    console.log(getCurrentTime().slice(0,9))
-    console.log(calculateDaysBetweenDates(getCurrentTime().slice(0,9),"10.10.2022"))
-    
+
+    return Math.trunc(daysToDate(string1) - daysToDate(getCurrentTime().slice(0, 9)))
+}
+
+
+const getCurrentTime = () => {     //  for generating timestamp
+    const currentDate = new Date();
+    return currentDate.toLocaleString();
+}
+
 // for generating birth date and jmbg
 const generateBirthDate = () => {
     const leapYears = [1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996, 2000, 2004]
@@ -91,6 +86,7 @@ const generateJMBG = (date) => {
     JMBGS.push(secondPartOfJMBG)
     return jmbg
 }
+// for creating accounts in library
 createAcc = (person) => {
     person.memberOfLibrary = true
     return {
@@ -103,18 +99,18 @@ createAcc = (person) => {
     }
 }
 // for creating transactions for every type
-const TransactionBorrow = (account,transactionID) => {
+const TransactionBorrow = (account, transactionID) => {
     return {
         firstName: account.firstName,
         lastName: account.lastName,
         book: account.currentBook,
         type: "Borrow",
         timeStamp: getCurrentTime(),
-        transactionID : transactionID
-        
+        transactionID: transactionID
+
     }
 }
-const TransactionReturn = (account,transactionID) => {
+const TransactionReturn = (account, transactionID) => {
     return {
         firstName: account.firstName,
         lastName: account.lastName,
@@ -125,7 +121,7 @@ const TransactionReturn = (account,transactionID) => {
         transactionID
     }
 }
-const TransactionDonate = (firstName, lastName, book, bookAuthor,transactionID) => {
+const TransactionDonate = (firstName, lastName, book, bookAuthor, transactionID) => {
     return {
         firstName,
         lastName,
@@ -136,7 +132,7 @@ const TransactionDonate = (firstName, lastName, book, bookAuthor,transactionID) 
         transactionID
     }
 }
-const penaltyTransaction = (account, amount, numberOfDaysPersonHaveBook = 0,transactionID) => {
+const penaltyTransaction = (account, amount, numberOfDaysPersonHaveBook = 0, transactionID) => {
     return {
         firstName: account.firstName,
         lastName: account.lastName,
@@ -183,6 +179,12 @@ class Library {
     }
     closeAccount(account_ID) {
         this.accounts.forEach(account => {
+            for (let i = 0; i < PEOPLE.length; i++) {
+                const person = PEOPLE[i];
+                if (account.jmbg == person.jmbg) {
+                    person.memberOfLibrary = false
+                }
+            }
             if (account.accId == account_ID) {
                 if (account.currentBook == undefined) {
                     this.numberOfAccounts -= 1
@@ -195,7 +197,7 @@ class Library {
     }
     donateBook(person, book) {
         this.transactionID = this.transactions.length
-        this.transactions.push(TransactionDonate(person.firstName, person.lastName, book.bookName, book.bookAuthor,this.transactionID))
+        this.transactions.push(TransactionDonate(person.firstName, person.lastName, book.bookName, book.bookAuthor, this.transactionID))
         this.listOfBooks.push(book)
         this.numberOfBooks += 1
         console.log("Thank you " + person.firstName + " " + person.lastName + " for donating '" + book.bookName + "' book")
@@ -205,7 +207,7 @@ class Library {
             if (account.currentBook == undefined) {
                 if (account.accId == ID) {
                     this.transactionID = this.transactions.length
-                    this.transactions.push(TransactionBorrow(account,this.transactionID))
+                    this.transactions.push(TransactionBorrow(account, this.transactionID))
                     console.log("Thank you " + person.firstName + " " + person.lastName + " for borrowing '" + book.bookName + "' book")
                     account.currentBook = book
                     account.allBorrowedBooks.push(book)
@@ -219,17 +221,18 @@ class Library {
             else return console.log("Before borrowing new book, please return old one")
         });
     }
-    returnBook(book, person, account_ID, numberOfDaysPersonHaveBook = 0) {
-        
-        person.currentBook = undefined,
-        this.accounts.forEach(account => {
+    returnBook(book, person, account_ID) {
 
-            if (numberOfDaysPersonHaveBook > 20) {
-                    this.fineAlert()
-                }
+        person.currentBook = undefined,
+            this.accounts.forEach(account => {
                 if (account.accId == account_ID) {
+                    const dateOfBorrowingBook = account.date.slice(0, 9)
+                    const numberOfDaysPersonHaveBook = calculateDaysBetweenDates(dateOfBorrowingBook)
+                    if (numberOfDaysPersonHaveBook > 20) {
+                        this.fineAlert()
+                    }
                     this.transactionID = this.transactions.length
-                    this.transactions.push(TransactionReturn(account,this.transactionID))
+                    this.transactions.push(TransactionReturn(account, this.transactionID))
                     account.currentBook = undefined
                     book.status = "Available"
                     this.listOfBooks.push(book)
@@ -242,8 +245,8 @@ class Library {
             if (account.accId == account_ID) {
                 this.transactionID = this.transactions.length
 
-                console.log("Thank you " + account.firstName + " " + account.lastName +" .You are suscesfuly payed fine")
-                this.penalties.push(penaltyTransaction(account, amount,this.transactionID))
+                console.log("Thank you " + account.firstName + " " + account.lastName + " .You are suscesfuly payed fine")
+                this.penalties.push(penaltyTransaction(account, amount, this.transactionID))
             }
         });
     }
@@ -305,7 +308,10 @@ let annaKarenina = new Book("Anna Karenina", "Leo Tolstoy", 1878, "Available");
 let toKillAMockingbird = new Book("To Kill a Mockingbird", "Harper Lee", 1960, "Available");
 let janeDoe = new Person("Jane", "Doe")
 let johnDoe = new Person("John", "Doe")
-let Childhood = new Book("Childhood","Leo Tolstoy",1852)
+let Childhood = new Book("Childhood", "Leo Tolstoy", 1852)
+
+const PEOPLE = [];      // array with all created people
+PEOPLE.push(janeDoe, johnDoe)
 
 // creating accounts 
 libary.createAccount(createAcc(janeDoe))
@@ -315,14 +321,14 @@ libary.createAccount(createAcc(johnDoe))
 libary.donateBook(janeDoe, theTrial)
 libary.donateBook(janeDoe, toKillAMockingbird)
 libary.donateBook(janeDoe, annaKarenina)
-libary.donateBook(johnDoe,Childhood)
+libary.donateBook(johnDoe, Childhood)
 
 // testing 
 
 libary.borrowBook(theTrial, janeDoe, 1)
 libary.borrowBook(toKillAMockingbird, janeDoe, 1)
 libary.borrowBook(annaKarenina, johnDoe, 2)
-// libary.returnBook(annaKarenina, johnDoe, 2)
+libary.returnBook(annaKarenina, johnDoe, 2)
 // libary.returnBook(toKillAMockingbird, janeDoe, 1)
 // libary.payFine(100, 1)
 
