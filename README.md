@@ -5,7 +5,7 @@ Create and simulate library
 
 
 
-LIST OF FEATURES:
+LIST OF FEATURES IN VERSION 2:
 
 
 - add books directly in library
