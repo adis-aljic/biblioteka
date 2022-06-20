@@ -169,20 +169,39 @@ const penaltyTransaction = (account, amount, numberOfDaysPersonHaveBook = 0, tra
 const addingBookTransaction = (bookName, bookAuthor, transactionID) => {
     return {
         bookName: bookName,
-        bookAuthor:bookAuthor,
+        bookAuthor: bookAuthor,
         type: "added book to library",
         timeStamp: getCurrentTime(),
         transactionID
     }
 }
-createBookID = (bookYear,bookName) => {      // function for creatin unique book ID
-                                                        // book name + year of publishing  book  without spaces
+const creatingAccountTransaction = (firstName, lastName, transactionID) => {
+    return {
+        firstName,
+        lastName,
+        type: "create account",
+        timeStamp: getCurrentTime(),
+        transactionID
+    }
+}
+const closingAccountTransaction = (firstName, lastName, transactionID) => {
+    return {
+        firstName,
+        lastName,
+        type: "closed account",
+        timeStamp: getCurrentTime(),
+        transactionID
+    }
+}
+
+createBookID = (bookYear, bookName) => {      // function for creatin unique book ID
+    // book name + year of publishing  book  without spaces
     let idBookName = ""
     for (let i = 0; i < bookName.length; i++) {
-        if(bookName[i] != " ") {idBookName += bookName[i]}
+        if (bookName[i] != " ") { idBookName += bookName[i] }
     }
-   
-    return idBookName + bookYear 
+
+    return idBookName + bookYear
 
 }
 
@@ -193,12 +212,12 @@ class Book {
     bookYear;       // when was book published
     status;         // is book avaiable or borrowed  or overdue
     constructor(bookName, bookAuthor, bookYear, status = "Avaiable") {
-    
+
         this.bookName = bookName,
             this.bookAuthor = bookAuthor,
             this.bookYear = bookYear,
             this.status = status
-            this.ID = createBookID(this.bookYear,this.bookName)
+        this.ID = createBookID(this.bookYear, this.bookName)
     }
 }
 class Library {
@@ -217,9 +236,12 @@ class Library {
             this.accounts = []
     }
     createAccount(account) {
+        this.transactionID = this.transactions.length + 1
+        this.transactions.push(creatingAccountTransaction(account.firstName, account.lastName, this.transactionID))
         account.accId = this.accounts.length + 1         // second id for every account, for esasier handling with system
-        this.accounts.push(account)                     
-        this.numberOfAccounts += 1;                     
+        this.accounts.push(account)
+        this.numberOfAccounts += 1;
+        console.log("Congratulation " + account.firstName + " " + account.lastName  + ".Your account was created.")
     }
     closeAccount(account_ID) {
         this.accounts.forEach(account => {
@@ -229,24 +251,27 @@ class Library {
                     person.memberOfLibrary = false          // change his memberOfLibrary status to false
                 }
             }
-            if (account.accId == account_ID) {              // if person doesen't have book borrowed only then he can close acc
-                if (account.currentBook.length == 0 ) {
+            if (account.accId == account_ID) {
+                this.transactionID = this.transactions.length + 1
+                this.transactions.push(closingAccountTransaction(account.firstName, account.lastName, this.transactionID))
+                // if person doesen't have book borrowed only then he can close acc
+                if (account.currentBook.length == 0) {
                     this.numberOfAccounts -= 1
                     this.accounts.splice(account.accId - 1, 1)
-                    return console.log("You are suscesfuly closed your account")
+                    return console.log(account.firstName + " " + account.lastName + " your account are suscesfuly closed")
                 }
                 else { return console.log("Please return books before closing your account") }
             }
         });
     }
-    addBooksToLibrary (book) {      // method for adding books in library
-        this.transactionID = this.transactions.length
+    addBooksToLibrary(book) {      // method for adding books in library
+        this.transactionID = this.transactions.length + 1
         this.transactions.push(addingBookTransaction(book.bookName, book.bookAuthor, this.transactionID))
-            this.listOfBooks.push(book)
-            this.numberOfBooks +=1
+        this.listOfBooks.push(book)
+        this.numberOfBooks += 1
     }
     donateBook(person, book) {          // method for donating books to library
-        this.transactionID = this.transactions.length
+        this.transactionID = this.transactions.length + 1
         this.transactions.push(TransactionDonate(person.firstName, person.lastName, book.bookName, book.bookAuthor, this.transactionID))
         this.listOfBooks.push(book)
         this.numberOfBooks += 1
@@ -254,8 +279,13 @@ class Library {
     }
     borrowBook(book, person, ID) {
         this.accounts.forEach(account => {
+            if (account.currentBook.status == "overdue") {
+                return console.log("You can not borrow new book until you return book and pay fine")
+            }
+            else {
+
                 if (account.accId == ID) {
-                    this.transactionID = this.transactions.length
+                    this.transactionID = this.transactions.length + 1
                     this.transactions.push(TransactionBorrow(account, this.transactionID))
                     console.log("Thank you " + person.firstName + " " + person.lastName + " for borrowing '" + book.bookName + "' book")
                     account.currentBook.push(book)
@@ -265,33 +295,34 @@ class Library {
                     this.listOfBooks.splice(this.listOfBooks.indexOf(book), 1) // after book is borrowed then it is deleted from
                     person.currentBook = book                                     // array listOfBooks in library
 
-                
+
+                }
             }
         });
     }
     returnBook(book, person, account_ID) {
 
-            this.accounts.forEach(account => {
-                if (account.accId == account_ID) {
-                    const dateOfBorrowingBook = account.date.slice(0, 9)        // calculate did person overdue 
-                    const numberOfDaysPersonHaveBook = calculateDaysBetweenDates(dateOfBorrowingBook)
-                    if (numberOfDaysPersonHaveBook > 20) { // book overdue is 20 days
-                        this.fineAlert()
-                    }
-                    
-                    this.transactionID = this.transactions.length
-                    this.transactions.push(TransactionReturn(account, this.transactionID))
-                    book.status = "Available"
-                    this.listOfBooks.push(book)
-                    account.currentBook.splice(account.currentBook.indexOf(book),1)
-                    console.log("Thank you " + person.firstName + " " + person.lastName + " for returning '" + book.bookName + "' book")
+        this.accounts.forEach(account => {
+            if (account.accId == account_ID) {
+                const dateOfBorrowingBook = account.date.slice(0, 9)        // calculate did person overdue 
+                const numberOfDaysPersonHaveBook = calculateDaysBetweenDates(dateOfBorrowingBook)
+                if (numberOfDaysPersonHaveBook > 20) { // book overdue is 20 days
+                    this.fineAlert()
                 }
-            });
+
+                this.transactionID = this.transactions.length + 1
+                this.transactions.push(TransactionReturn(account, this.transactionID))
+                book.status = "Available"
+                this.listOfBooks.push(book)
+                account.currentBook.splice(account.currentBook.indexOf(book), 1)
+                console.log("Thank you " + person.firstName + " " + person.lastName + " for returning '" + book.bookName + "' book")
+            }
+        });
     }
     payFine(amount, account_ID) {
         this.accounts.forEach(account => {              // ckeck does account is same as one who need to pay fine
             if (account.accId == account_ID) {
-                this.transactionID = this.transactions.length
+                this.transactionID = this.transactions.length + 1
 
                 console.log("Thank you " + account.firstName + " " + account.lastName + " .You are suscesfuly payed fine")
                 this.penalties.push(penaltyTransaction(account, amount, this.transactionID))
@@ -303,16 +334,14 @@ class Library {
     }
     weeklyCheckForOverdueBooks() {
         this.accounts.forEach(account => {
-            
             const dateOfBorrowingBook = account.date.slice(0, 9)        // calculate did person overdue 
             const numberOfDaysPersonHaveBook = calculateDaysBetweenDates(dateOfBorrowingBook)
             if (numberOfDaysPersonHaveBook > 20) { // book overdue is 20 days
                 this.currentBook.forEach(book => {
-                        book.status = "Overdue"         // after find account who have overdue then find all books in that account and
+                    book.status = "Overdue"         // after find account who have overdue then find all books in that account and
                 });                                     // change their status to overdue
             }
         });
-
     }
     findBookByName(nameOfBook) {
         for (let i = 0; i < this.listOfBooks.length; i++) {
@@ -321,7 +350,7 @@ class Library {
         }
     }
     findBookByAuthor(authorOfBook) {
-        const booksFromAuthor = []      
+        const booksFromAuthor = []
         for (let i = 0; i < this.listOfBooks.length; i++) {
             const book = this.listOfBooks[i]
             if (book.bookAuthor == authorOfBook) {
@@ -398,4 +427,4 @@ libary.payFine(100, 1)
 // console.log(libary.findBookByAuthor("Leo Tolstoy"))
 
 console.log(libary.findAccountByACCID(1))
-console.log(libary.transactions)
+// console.log(libary.transactions)
