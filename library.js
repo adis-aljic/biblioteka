@@ -1,3 +1,5 @@
+//  IN THIS VERSION PERSON CAN ONLY BORROW ONE BOOK AT TIME
+
 // for caluculating days between borrowing and returning book
 const FindLeapYear = (year) => {
     let cnt = 0
@@ -44,7 +46,7 @@ const calculateDaysBetweenDates = (string1) => {
 }
 
 
-const getCurrentTime = () => {     //  for generating timestamp
+const getCurrentTime = () => {     //  for generating timestamp, time and date for every transaction
     const currentDate = new Date();
     return currentDate.toLocaleString();
 }
@@ -78,7 +80,7 @@ const generateJMBG = (date) => {
         if (element == ".") continue
         else firstPartOfJMBG += element
     }
-    let secondPartOfJMBG = Math.trunc(Math.random() * 899999 + 100000)
+    let secondPartOfJMBG = Math.trunc(Math.random() * 899999 + 100000)  // second part of jmbg is unique for every person
     let jmbg = 0
     if (!JMBGS.includes(secondPartOfJMBG)) {
         jmbg = firstPartOfJMBG + secondPartOfJMBG
@@ -95,7 +97,7 @@ createAcc = (person) => {
         jmbg: person.jmbg,
         id: person.jmbg.slice(-6),  // first account id
         currentBook: undefined,
-        allBorrowedBooks: []
+        allBorrowedBooks: []        // all books that person are borrowed from library 
     }
 }
 // for creating transactions for every type
@@ -115,7 +117,6 @@ const TransactionReturn = (account, transactionID) => {
         firstName: account.firstName,
         lastName: account.lastName,
         book: account.currentBook,
-
         type: "Return",
         timeStamp: getCurrentTime(),
         transactionID
@@ -140,7 +141,7 @@ const penaltyTransaction = (account, amount, numberOfDaysPersonHaveBook = 0, tra
         book: account.currentBook,
         type: "penalty for overdue",
         timeStamp: getCurrentTime(),
-        overdue: numberOfDaysPersonHaveBook + " days",
+        overdue: numberOfDaysPersonHaveBook + " days",  // how long person kept book
         transactionID
     }
 }
@@ -148,8 +149,7 @@ class Book {
     bookName;
     bookAuthor;
     bookYear;       // when was book published
-    status;         // is book avaiable or borrowed
-
+    status;         // is book avaiable or borrowed 
     constructor(bookName, bookAuthor, bookYear, status = "Avaiable") {
         this.bookName = bookName,
             this.bookAuthor = bookAuthor,
@@ -174,18 +174,18 @@ class Library {
     }
     createAccount(account) {
         account.accId = this.accounts.length + 1         // second id for every account, for esasier handling with system
-        this.accounts.push(account)
-        this.numberOfAccounts += 1;
+        this.accounts.push(account)                     
+        this.numberOfAccounts += 1;                     
     }
     closeAccount(account_ID) {
         this.accounts.forEach(account => {
             for (let i = 0; i < PEOPLE.length; i++) {
-                const person = PEOPLE[i];
-                if (account.jmbg == person.jmbg) {
-                    person.memberOfLibrary = false
+                const person = PEOPLE[i];       /// PEOPLE is array which contain all created persons
+                if (account.jmbg == person.jmbg) {          // if jmbg from acc is same as jmbg from person then 
+                    person.memberOfLibrary = false          // change his memberOfLibrary status to false
                 }
             }
-            if (account.accId == account_ID) {
+            if (account.accId == account_ID) {              // if person doesen't have book borrowed only then he can close acc
                 if (account.currentBook == undefined) {
                     this.numberOfAccounts -= 1
                     this.accounts.splice(account.accId - 1, 1)
@@ -204,7 +204,7 @@ class Library {
     }
     borrowBook(book, person, ID) {
         this.accounts.forEach(account => {
-            if (account.currentBook == undefined) {
+            if (account.currentBook == undefined) {         // if person doesn't have book only then he can borrow book
                 if (account.accId == ID) {
                     this.transactionID = this.transactions.length
                     this.transactions.push(TransactionBorrow(account, this.transactionID))
@@ -213,8 +213,8 @@ class Library {
                     account.allBorrowedBooks.push(book)
                     book.status = "borrowed"
                     account.date = getCurrentTime();
-                    this.listOfBooks.splice(libary.listOfBooks.indexOf(book), 1)
-                    person.currentBook = book
+                    this.listOfBooks.splice(libary.listOfBooks.indexOf(book), 1) // after book is borrowed then it is deleted from
+                    person.currentBook = book                                     // array listOfBooks in library
 
                 }
             }
@@ -226,7 +226,7 @@ class Library {
         person.currentBook = undefined,
             this.accounts.forEach(account => {
                 if (account.accId == account_ID) {
-                    const dateOfBorrowingBook = account.date.slice(0, 9)
+                    const dateOfBorrowingBook = account.date.slice(0, 9)        // calculate did person overdue 
                     const numberOfDaysPersonHaveBook = calculateDaysBetweenDates(dateOfBorrowingBook)
                     if (numberOfDaysPersonHaveBook > 20) {
                         this.fineAlert()
@@ -241,7 +241,7 @@ class Library {
             });
     }
     payFine(amount, account_ID) {
-        this.accounts.forEach(account => {
+        this.accounts.forEach(account => {              // ckeck does account is same as one who need to pay fine
             if (account.accId == account_ID) {
                 this.transactionID = this.transactions.length
 
@@ -260,14 +260,14 @@ class Library {
         }
     }
     findBookByAuthor(authorOfBook) {
-        const booksFromAuthor = []
+        const booksFromAuthor = []      
         for (let i = 0; i < this.listOfBooks.length; i++) {
             const book = this.listOfBooks[i]
             if (book.bookAuthor == authorOfBook) {
                 booksFromAuthor.push(book)
             }
         }
-        return booksFromAuthor
+        return booksFromAuthor  // because one author can have more books this function returns array 
     }
     findAccountByACCID(accId1 = 0) {
         for (let i = 0; i < this.accounts.length; i++) {
@@ -279,9 +279,9 @@ class Library {
         const listOfAcounts = []
         for (let i = 0; i < this.accounts.length; i++) {
             const account = this.accounts[i];
-            if (account.firstName == name || account.lastName == lastname) listOfAcounts.push(account)
+            if (account.firstName == name && account.lastName == lastname) listOfAcounts.push(account)
         }
-        return listOfAcounts
+        return listOfAcounts    // because one author can have more books this function returns array 
     }
 }
 
