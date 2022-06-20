@@ -161,18 +161,19 @@ const penaltyTransaction = (account, amount, numberOfDaysPersonHaveBook = 0, tra
         ammount: amount,
         book: account.currentBook,
         type: "penalty for overdue",
-        timeStamp: getCurrentTime(),
+        timeStampReturning: getCurrentTime(),
         overdue: numberOfDaysPersonHaveBook + " days",  // how long person kept book
         transactionID
     }
 }
-const addingBookTransaction = (bookName, bookAuthor, transactionID) => {
+const buyinhBookForLibraryTransaction = (bookName, bookAuthor, transactionID,amount) => {
     return {
         bookName: bookName,
         bookAuthor: bookAuthor,
         type: "added book to library",
         timeStamp: getCurrentTime(),
-        transactionID
+        transactionID,
+        amount : amount     // how much book cost
     }
 }
 const creatingAccountTransaction = (firstName, lastName, transactionID) => {
@@ -229,6 +230,7 @@ class Library {
     transactions = [];    // list of all transactions in library
     penalties = [];       // list of all penalties in library
     libraryId;
+    finance = 10;        // library budget
     constructor(libraryName, libraryId) {
         this.libraryName = libraryName,
             this.libraryId = libraryId,
@@ -264,11 +266,17 @@ class Library {
             }
         });
     }
-    addBooksToLibrary(book) {      // method for adding books in library
-        this.transactionID = this.transactions.length + 1
-        this.transactions.push(addingBookTransaction(book.bookName, book.bookAuthor, this.transactionID))
-        this.listOfBooks.push(book)
-        this.numberOfBooks += 1
+    buyBooksForLibrary(book,amount) {      // method for adding books in library
+        if(this.finance < amount) return console.log("You don't have enough money to buy book. Your budget is " + this.finance + " and book cost " + amount) 
+  
+        else {
+
+            this.transactionID = this.transactions.length + 1
+            this.transactions.push(buyinhBookForLibraryTransaction(book.bookName, book.bookAuthor, this.transactionID,amount))
+            this.listOfBooks.push(book)
+            this.numberOfBooks += 1
+            this.finance -= amount
+        }
     }
     donateBook(person, book) {          // method for donating books to library
         this.transactionID = this.transactions.length + 1
@@ -322,10 +330,10 @@ class Library {
     payFine(amount, account_ID) {
         this.accounts.forEach(account => {              // ckeck does account is same as one who need to pay fine
             if (account.accId == account_ID) {
-                this.transactionID = this.transactions.length + 1
-
-                console.log("Thank you " + account.firstName + " " + account.lastName + " .You are suscesfuly payed fine")
+                this.transactionID = this.penalties.length + 1
                 this.penalties.push(penaltyTransaction(account, amount, this.transactionID))
+                this.finance += amount
+                console.log("Thank you " + account.firstName + " " + account.lastName + " .You are suscesfuly payed fine")
             }
         });
     }
@@ -413,7 +421,7 @@ libary.donateBook(janeDoe, theTrial)
 libary.donateBook(janeDoe, toKillAMockingbird)
 libary.donateBook(janeDoe, annaKarenina)
 libary.donateBook(johnDoe, Childhood)
-libary.addBooksToLibrary(toKillAMockingbird1)
+libary.buyBooksForLibrary(toKillAMockingbird1,5)
 
 // testing 
 
@@ -422,9 +430,8 @@ libary.borrowBook(toKillAMockingbird, janeDoe, 1)
 libary.borrowBook(toKillAMockingbird1, johnDoe, 2)
 // libary.returnBook(toKillAMockingbird1, johnDoe, 2)
 libary.returnBook(toKillAMockingbird, janeDoe, 1)
-libary.payFine(100, 1)
 
 // console.log(libary.findBookByAuthor("Leo Tolstoy"))
 
-console.log(libary.findAccountByACCID(1))
+console.log(libary)
 // console.log(libary.transactions)
